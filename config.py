@@ -41,8 +41,8 @@ FORCE_SUB_CHANNEL4 = int(os.environ.get("FORCE_SUB_CHANNEL4", "-1002182435006"))
 
 #Shortner (token system) 
 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "runurl.in") 
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "de269d8600980d752d18103f05087657c56fdd1e")
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "instantearn.in") 
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "47070a188ed5491b80f3b70adde6f9954a1e6ee7")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True")
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Ultroid_Official/18")
