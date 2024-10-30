@@ -51,6 +51,18 @@ async def decode(base64_string):
     string = string_bytes.decode("ascii")
     return string
 
+async def encode_premium(vipstring):
+    # Double encoding for premium links
+    first_encoding = await encode(vipstring)
+    second_encoding = await encode(first_encoding)
+    return second_encoding
+
+async def decode_premium(second_encoding):
+    # Double decoding for premium links
+    first_decoding = await decode(second_encoding)
+    second_decoding = await decode(first_decoding)
+    return second_decoding
+
 async def get_messages(client, message_ids):
     messages = []
     total_messages = 0
