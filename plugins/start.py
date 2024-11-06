@@ -98,7 +98,7 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
     await client.delete_messages(chat_id=chat_id, message_ids=message_id)
     delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
     
-@Bot.on_message(filters.command('start') & filters.private & subscribed)
+@Client.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
     UBAN = BAN  # Fetch the owner's ID from config
@@ -242,7 +242,7 @@ REPLY_ERROR = """<code>Use this command as a replay to any telegram message with
 
     
     
-@Bot.on_message(filters.command('start') & filters.private)
+@Client.on_message(filters.command('start') & filters.private)
 async def not_joined(client: Client, message: Message):
     buttons = [
         [
