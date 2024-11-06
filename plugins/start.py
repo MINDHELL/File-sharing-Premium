@@ -74,12 +74,29 @@ async def is_premium_user(user_id):
         return True
     return False
 
+"""
 # Function to schedule deletion of a message
 async def schedule_auto_delete(client, chat_id, message_id, delay):
     await sleep(delay)  # Delay in seconds
     await client.delete_messages(chat_id=chat_id, message_ids=message_id)
     logger.info(f"Deleted message with ID {message_id} from chat {chat_id}")
+"""
 
+async def add_delete_task(chat_id, message_id, delete_at):
+    delete_tasks.insert_one({
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "delete_at": delete_at
+    })
+
+# Function to delete a message and remove it from the task collection
+async def schedule_auto_delete(client, chat_id, message_id, delay):
+    delete_at = datetime.now() + timedelta(seconds=delay)
+    await add_delete_task(chat_id, message_id, delete_at)
+    await asyncio.sleep(delay)  # Delay in seconds
+    await client.delete_messages(chat_id=chat_id, message_ids=message_id)
+    delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
+    
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
