@@ -138,6 +138,7 @@ async def start_command(client: Client, message: Message):
             except:
                 error_msg = await message.reply_text("Something went wrong..!")
                 return
+            await temp_msg.delete()
 
             snt_msgs = []
             for msg in messages:
