@@ -197,7 +197,7 @@ async def start_command(client: Client, message: Message):
                     protect_content=False,
                     quote=True
                 )
-                await schedule_auto_delete(client, verification_message.chat.id, verification_message.id, delay=600)
+                #await schedule_auto_delete(client, verification_message.chat.id, verification_message.id, delay=600)
 
 
 
