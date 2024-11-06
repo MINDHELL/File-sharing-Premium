@@ -44,6 +44,7 @@ delete_after = 600
 client = MongoClient(DB_URI)  # Replace with your MongoDB URI
 db = client[DB_NAME]  # Database name
 pusers = db["pusers"]  # Collection for users
+delete_tasks = db["delete_tasks"] 
 
 
 
