@@ -99,7 +99,7 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
     delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
     
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
-async def start_command(client: Client, message: Message):
+async def start_command(bot: Bot, message: Message):
     id = message.from_user.id
     UBAN = BAN  # Fetch the owner's ID from config
     
@@ -243,7 +243,7 @@ REPLY_ERROR = """<code>Use this command as a replay to any telegram message with
     
     
 @Bot.on_message(filters.command('start') & filters.private)
-async def not_joined(client: Client, message: Message):
+async def not_joined(bot: Bot, message: Message):
     buttons = [
         [
             InlineKeyboardButton(text="Join Channel", url=client.invitelink),
@@ -282,13 +282,13 @@ async def not_joined(client: Client, message: Message):
 
 
 @Bot.on_message(filters.command('users') & filters.private & filters.user(ADMINS))
-async def get_users(client: Bot, message: Message):
+async def get_users(bot: Bot, message: Message):
     msg = await client.send_message(chat_id=message.chat.id, text=WAIT_MSG)
     users = await full_userbase()
     await msg.edit(f"{len(users)} users are using this bot")
 
 @Bot.on_message(filters.private & filters.command('broadcast') & filters.user(ADMINS))
-async def send_text(client: Bot, message: Message):
+async def send_text(bot: Bot, message: Message):
     if message.reply_to_message:
         query = await full_userbase()
         broadcast_msg = message.reply_to_message
