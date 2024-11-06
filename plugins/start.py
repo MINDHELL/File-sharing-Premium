@@ -36,44 +36,16 @@ from config import (
 from helper_func import subscribed, encode, decode, get_messages, get_shortlink, get_verify_status, update_verify_status, get_exp_time
 from database.database import add_user, del_user, full_userbase, present_user
 from shortzy import Shortzy
+from asyncio import sleep
+
+
+delete_after = 600
 
 client = MongoClient(DB_URI)  # Replace with your MongoDB URI
 db = client[DB_NAME]  # Database name
 pusers = db["pusers"]  # Collection for users
 
-# Initialize the scheduler
-scheduler = AsyncIOScheduler()
-scheduler.start()
 
-# MongoDB Helper Functions (For deletions)
-async def schedule_message_deletion(chat_id, message_id, delete_at):
-    """Schedule the message to be deleted at a specified time."""
-    db.deletions.insert_one({
-        "chat_id": chat_id,
-        "message_id": message_id,
-        "delete_at": delete_at
-    })
-
-# Function to delete messages in batches
-async def delete_scheduled_messages():
-    """Delete messages that are scheduled for deletion."""
-    current_time = datetime.now()
-    deletions = await db.deletions.find({"delete_at": {"$lt": current_time}}).to_list(length=None)  # Fetch messages scheduled for deletion
-    messages_to_delete = []
-    
-    for deletion in deletions:
-        messages_to_delete.append((deletion["chat_id"], deletion["message_id"]))
-        await db.deletions.delete_one({"_id": deletion["_id"]})  # Remove entry after deletion
-    
-    # Batch delete messages asynchronously
-    for chat_id, message_id in messages_to_delete:
-        try:
-            await client.delete_messages(chat_id, message_id)
-        except Exception as e:
-            print(f"Error deleting message {message_id} in {chat_id}: {e}")
-
-# Schedule the deletion task to run every 5 minutes
-scheduler.add_job(delete_scheduled_messages, 'interval', minutes=5)
 
 # MongoDB Helper Functions
 async def add_premium_user(user_id, duration_in_days):
@@ -102,19 +74,26 @@ async def is_premium_user(user_id):
         return True
     return False
 
+# Function to schedule deletion of a message
+async def schedule_auto_delete(client, chat_id, message_id, delay):
+    await sleep(delay)  # Delay in seconds
+    await client.delete_messages(chat_id=chat_id, message_ids=message_id)
+    logger.info(f"Deleted message with ID {message_id} from chat {chat_id}")
+
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
     UBAN = BAN  # Fetch the owner's ID from config
     
-    # Schedule the message for deletion 10 minutes later
+    # Schedule the initial message for deletion after 10 minutes
     delete_time = datetime.now() + timedelta(minutes=10)  # Schedule for 10 minutes later
-    await schedule_message_deletion(message.chat.id, message.id, delete_time)
+    await schedule_auto_delete(client, message.chat.id, message.id, delay=600)
     await message.reply("Your message will be auto-deleted after 10 minutes.")
-    
+
     # Check if the user is the owner
     if id == UBAN:
-        await message.reply("You are the U-BAN! Additional actions can be added here.")
+        sent_message = await message.reply("You are the U-BAN! Additional actions can be added here.")
+        #await schedule_auto_delete(client, sent_message.chat.id, sent_message.id, delay=600)
 
     else:
         if not await present_user(id):
@@ -124,20 +103,23 @@ async def start_command(client: Client, message: Message):
                 print(f"Error adding user: {e}")
 
         premium_status = await is_premium_user(id)
-             
         verify_status = await get_verify_status(id)
+        
+        # Check verification status
         if verify_status['is_verified'] and VERIFY_EXPIRE < (time.time() - verify_status['verified_time']):
             await update_verify_status(id, is_verified=False)
 
+        # Handle token verification link
         if "verify_" in message.text:
             _, token = message.text.split("_", 1)
             if verify_status['verify_token'] != token:
-                return await message.reply("Your token is invalid or Expired. Try again by clicking /start")
+                sent_message = await message.reply("Your token is invalid or expired. Try again by clicking /start.")
+                #await schedule_auto_delete(client, sent_message.chat.id, sent_message.id, delay=600)
+                return
             await update_verify_status(id, is_verified=True, verified_time=time.time())
-            if verify_status["link"] == "":
-                reply_markup = None
-            await message.reply(f"Your token successfully verified and valid for: 24 Hour", reply_markup=reply_markup, protect_content=False, quote=True)
-    
+            sent_message = await message.reply("Your token was successfully verified and is valid for 24 hours.")
+            #await schedule_auto_delete(client, sent_message.chat.id, sent_message.id, delay=600)
+
         elif len(message.text) > 7 and (verify_status['is_verified'] or premium_status):
             try:
                 base64_string = message.text.split(" ", 1)[1]
@@ -145,58 +127,45 @@ async def start_command(client: Client, message: Message):
                 return
             _string = await decode(base64_string)
             argument = _string.split("-")
+            ids = []
+
             if len(argument) == 3:
-                try:
-                    start = int(int(argument[1]) / abs(client.db_channel.id))
-                    end = int(int(argument[2]) / abs(client.db_channel.id))
-                except:
-                    return
-                if start <= end:
-                    ids = range(start, end+1)
-                else:
-                    ids = []
-                    i = start
-                    while True:
-                        ids.append(i)
-                        i -= 1
-                        if i < end:
-                            break
+                start = int(int(argument[1]) / abs(client.db_channel.id))
+                end = int(int(argument[2]) / abs(client.db_channel.id))
+                ids = range(start, end+1) if start <= end else []
             elif len(argument) == 2:
-                try:
-                    ids = [int(int(argument[1]) / abs(client.db_channel.id))]
-                except:
-                    return
+                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+
             temp_msg = await message.reply("Please wait...")
+            #await schedule_auto_delete(client, temp_msg.chat.id, temp_msg.id, delay=600)
+
             try:
                 messages = await get_messages(client, ids)
             except:
-                await message.reply_text("Something went wrong..!")
+                error_msg = await message.reply_text("Something went wrong..!")
+                #await schedule_auto_delete(client, error_msg.chat.id, error_msg.id, delay=600)
                 return
-            await temp_msg.delete()
-            
+
             snt_msgs = []
             
+            # Send and auto-delete messages for each document
             for msg in messages:
-                if bool(CUSTOM_CAPTION) & bool(msg.document):
-                    caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
-                else:
-                    caption = "" if not msg.caption else msg.caption.html
-
-                if DISABLE_CHANNEL_BUTTON:
-                    reply_markup = msg.reply_markup
-                else:
-                    reply_markup = None
+                caption = (CUSTOM_CAPTION.format(previouscaption=msg.caption.html, filename=msg.document.file_name)
+                           if CUSTOM_CAPTION and msg.document else msg.caption.html or "")
+                reply_markup = None if DISABLE_CHANNEL_BUTTON else msg.reply_markup
 
                 try:
-                    snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    await asyncio.sleep(0.5)
+                    snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
                     snt_msgs.append(snt_msg)
+                    await schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=3600)
+                    await sleep(0.5)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                    snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
                     snt_msgs.append(snt_msg)
-                except:
-                    pass
+                    #await schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=3600)
+
+        # Display user information if verified or premium
         elif verify_status['is_verified'] or premium_status:
             reply_markup = InlineKeyboardMarkup(
                 [
@@ -209,8 +178,7 @@ async def start_command(client: Client, message: Message):
                     ]
                 ]
             )
-
-            await message.reply_text(
+            welcome_message = await message.reply_text(
                 text=START_MSG.format(
                     first=message.from_user.first_name,
                     last=message.from_user.last_name,
@@ -222,21 +190,27 @@ async def start_command(client: Client, message: Message):
                 disable_web_page_preview=True,
                 quote=True
             )
+            #await schedule_auto_delete(client, welcome_message.chat.id, welcome_message.id, delay=600)
 
         else:
+            # If not verified, send verification message with link
             verify_status = await get_verify_status(id)
             if IS_VERIFY and not verify_status['is_verified']:
-                short_url = f"adrinolinks.in"
-                # TUT_VID = f"https://t.me/ultroid_official/18"
                 token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
                 await update_verify_status(id, verify_token=token, link="")
-                link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API,f'https://telegram.dog/{client.username}?start=verify_{token}')
+                link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
                 btn = [
                     [InlineKeyboardButton("Click here", url=link)],
-                    [InlineKeyboardButton('How to use the bot', url=TUT_VID)],
-                    [InlineKeyboardButton('✨ Premium', callback_data="upi_info")]
+                    [InlineKeyboardButton("How to use the bot", url=TUT_VID)],
+                    [InlineKeyboardButton("✨ Premium", callback_data="upi_info")]
                 ]
-                await message.reply(f"Your Ads token is expired, refresh your token and try again.\n\nToken Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\nWhat is the token?\n\nThis is an ads token. If you pass 1 ad, you can use the bot for 24 Hour after passing the ad.", reply_markup=InlineKeyboardMarkup(btn), protect_content=False, quote=True)
+                verification_message = await message.reply(
+                    f"Your token has expired. Refresh your token to continue.\nToken Timeout: {get_exp_time(VERIFY_EXPIRE)}",
+                    reply_markup=InlineKeyboardMarkup(btn),
+                    protect_content=False,
+                    quote=True
+                )
+                await schedule_auto_delete(client, verification_message.chat.id, verification_message.id, delay=600)
 
 
     
