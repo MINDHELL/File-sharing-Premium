@@ -64,7 +64,7 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
     await client.delete_messages(chat_id=chat_id, message_ids=message_id)
     logger.info(f"Deleted message with ID {message_id} from chat {chat_id}")
 """
-
+"""
 # Function to add a delete task to the database
 async def add_delete_task(chat_id, message_id, delete_at):
     delete_tasks.insert_one({
@@ -84,6 +84,38 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
         await client.delete_messages(chat_id=chat_id, message_ids=message_id)
         delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
     asyncio.create_task(delete_message())  # Schedule in background
+"""
+
+# Function to add a delete task to the database
+async def add_delete_task(chat_id, message_id, delete_at):
+    delete_tasks.insert_one({
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "delete_at": delete_at
+    })
+
+# Non-blocking auto-delete function with user notification
+async def schedule_auto_delete(client, chat_id, message_id, delay):
+    delete_at = datetime.now() + timedelta(seconds=delay)
+    await add_delete_task(chat_id, message_id, delete_at)
+    
+    # Run deletion in the background to prevent blocking
+    async def delete_message():
+        await asyncio.sleep(delay)
+        try:
+            # Delete the message
+            await client.delete_messages(chat_id=chat_id, message_ids=message_id)
+            delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
+            
+            # Notify the user that the message has been deleted
+            notification_text = "The message has been automatically deleted after the specified time."
+            await client.send_message(chat_id, notification_text)
+        
+        except Exception as e:
+            print(f"Error deleting message {message_id} in chat {chat_id}: {e}")
+
+    asyncio.create_task(delete_message())  # Schedule the deletion and notification in the background
+    
 
     
 @Bot.on_message(filters.command('start') & filters.private)
