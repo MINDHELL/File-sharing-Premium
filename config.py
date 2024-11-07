@@ -16,6 +16,7 @@ OWNER_ID = int(os.environ.get("OWNER_ID", "7131513396")) #Owner user id
 SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "ULTROIDOFFICIAL_CHAT") # WITHOUR @
 CHANNEL = os.environ.get("CHANNEL", "ULTROID_OFFICIAL") # WITHOUR @
 delete_after = os.environ.get("delete_after", 0) #seconds
+AUTO_DELETE = False 
 
 PAYMENT_QR = os.getenv('PAYMENT_QR', 'https://graph.org/file/c54fdc8a5580bb801abc2.jpg')
 
