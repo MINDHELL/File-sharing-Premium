@@ -187,13 +187,28 @@ async def start_command(client: Client, message: Message):
                     reply_markup = None
                 
                 try:
+                    messages = await get_messages(client, ids)
                     snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
                     snt_msgs.append(snt_msg)
                     if AUTO_DELETE:
                         #await message.reply_text(f"The message will be automatically deleted in {delete_after} seconds.")
                         asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=delete_after))
+                    asyncio.sleep(0.2)
+                    
+                    get_file_markup = InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton(
+                                    text="Try Again",
+                                    url=f"https://t.me/{client.username}?start={message.text.split()[1]}"
+                                )
+                            ]
+                        ]
+                    )
+                    await message.reply("File was deleted after the set time limit. Use the button below to get the file again.", reply_markup=get_file_markup)
+            
                         
-                    await asyncio.sleep(0.2)
+                    #asyncio.sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
