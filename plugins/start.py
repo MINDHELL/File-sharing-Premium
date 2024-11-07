@@ -193,7 +193,7 @@ async def start_command(client: Client, message: Message):
                     if AUTO_DELETE:
                         #await message.reply_text(f"The message will be automatically deleted in {delete_after} seconds.")
                         asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=delete_after))
-                    asyncio.sleep(0.2)
+                    await asyncio.sleep(0.2)
                     
                     get_file_markup = InlineKeyboardMarkup(
                         [
