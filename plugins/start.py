@@ -161,7 +161,7 @@ async def start_command(client: Client, message: Message):
                     snt_msgs.append(snt_msg)
                     asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=60))
                     await message.reply_text("The message will be automatically deleted in 60 seconds.")
-                    await sleep(0.2)
+                    await asyncio.sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
