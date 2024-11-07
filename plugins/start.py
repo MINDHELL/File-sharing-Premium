@@ -20,8 +20,6 @@ from config import *
 from helper_func import subscribed, encode, decode, get_messages, get_shortlink, get_verify_status, update_verify_status, get_exp_time
 from database.database import add_user, del_user, full_userbase, present_user
 from shortzy import Shortzy
-from asyncio import sleep
-
 
 delete_after = 600
 
@@ -67,6 +65,7 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
     logger.info(f"Deleted message with ID {message_id} from chat {chat_id}")
 """
 
+# Function to add a delete task to the database
 async def add_delete_task(chat_id, message_id, delete_at):
     delete_tasks.insert_one({
         "chat_id": chat_id,
@@ -74,13 +73,18 @@ async def add_delete_task(chat_id, message_id, delete_at):
         "delete_at": delete_at
     })
 
-# Function to delete a message and remove it from the task collection
+# Non-blocking auto-delete function
 async def schedule_auto_delete(client, chat_id, message_id, delay):
     delete_at = datetime.now() + timedelta(seconds=delay)
     await add_delete_task(chat_id, message_id, delete_at)
-    await asyncio.sleep(delay)  # Delay in seconds
-    await client.delete_messages(chat_id=chat_id, message_ids=message_id)
-    delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
+    
+    # Run deletion in the background to prevent blocking
+    async def delete_message():
+        await asyncio.sleep(delay)
+        await client.delete_messages(chat_id=chat_id, message_ids=message_id)
+        delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
+    asyncio.create_task(delete_message())  # Schedule in background
+
     
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
@@ -155,8 +159,8 @@ async def start_command(client: Client, message: Message):
                 try:
                     snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
                     snt_msgs.append(snt_msg)
-                    await schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=60)
-                    message.reply_text("Successfully deleted...!")
+                    asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=60))
+                    await message.reply_text("The message will be automatically deleted in 60 seconds.")
                     await sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
