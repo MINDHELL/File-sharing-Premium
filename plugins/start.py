@@ -108,7 +108,7 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
             delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
             
             # Notify the user that the message has been deleted
-            notification_text = f"The message has been automatically deleted after {delay} seconds."
+            notification_text = f"Successfully DELETED !!"
             await client.send_message(chat_id, notification_text)
         
         except Exception as e:
@@ -199,13 +199,13 @@ async def start_command(client: Client, message: Message):
                         [
                             [
                                 InlineKeyboardButton(
-                                    text="Try Again",
+                                    text="GET FILE AGAIN",
                                     url=f"https://t.me/{client.username}?start={message.text.split()[1]}"
                                 )
                             ]
                         ]
                     )
-                    await message.reply("File was deleted after the set time limit. Use the button below to get the file again.", reply_markup=get_file_markup)
+                    await message.reply("File was deleted after the {delete_after} second. \nUse the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
             
                         
                     #asyncio.sleep(0.2)
