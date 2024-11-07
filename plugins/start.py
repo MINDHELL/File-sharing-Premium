@@ -175,6 +175,7 @@ async def start_command(client: Client, message: Message):
             await temp_msg.delete()
 
             snt_msgs = []
+            messages = await get_messages(client, ids)
             for msg in messages:
                 if bool(CUSTOM_CAPTION) & bool(msg.document):
                     caption = CUSTOM_CAPTION.format(previouscaption = "" if not msg.caption else msg.caption.html, filename = msg.document.file_name)
@@ -193,26 +194,23 @@ async def start_command(client: Client, message: Message):
                     if AUTO_DELETE:
                         #await message.reply_text(f"The message will be automatically deleted in {delete_after} seconds.")
                         asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=delete_after))
-                    await asyncio.sleep(0.2)
-                    
-                    get_file_markup = InlineKeyboardMarkup(
-                        [
-                            [
-                                InlineKeyboardButton(
-                                    text="GET FILE AGAIN",
-                                    url=f"https://t.me/{client.username}?start={message.text.split()[1]}"
-                                )
-                            ]
-                        ]
-                    )
-                    await message.reply(f"File was deleted after the {delete_after} second. \nUse the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
-            
-                        
+                    await asyncio.sleep(0.2)      
                     #asyncio.sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
-                    snt_msgs.append(snt_msg)
+                    snt_msgs.append(snt_msg)     
+
+            # Notify user to get file again if messages are auto-deleted
+            if AUTO_DELETE:
+                get_file_markup = InlineKeyboardMarkup([
+                    [InlineKeyboardButton("GET FILE AGAIN", url=f"https://t.me/{client.username}?start={message.text.split()[1]}")]
+                ])
+                await message.reply(f"File was deleted after {delete_after} seconds. Use the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
+                
+
+            
+              
         elif verify_status['is_verified'] or premium_status:
             reply_markup = InlineKeyboardMarkup(
                 [
