@@ -108,17 +108,15 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
             delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
             
             # Notify the user that the message has been deleted
-            notification_text = "The message has been automatically deleted after the specified time."
+            notification_text = f"The message has been automatically deleted after {delay} seconds."
             await client.send_message(chat_id, notification_text)
         
         except Exception as e:
             print(f"Error deleting message {message_id} in chat {chat_id}: {e}")
 
     asyncio.create_task(delete_message())  # Schedule the deletion and notification in the background
-    
 
-    
-@Bot.on_message(filters.command('start') & filters.private)
+@Bot.on_message(filters.command('start') & filters.private & subscribed )
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
     UBAN = BAN  # Fetch the owner's ID from config
@@ -192,8 +190,9 @@ async def start_command(client: Client, message: Message):
                     snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
                     snt_msgs.append(snt_msg)
                     if AUTO_DELETE:
+                        await message.reply_text(f"The message will be automatically deleted in {delete_after} seconds.")
                         asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=delete_after))
-                        await message.reply_text("The message will be automatically deleted in 60 seconds.")
+                        
                     await asyncio.sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
