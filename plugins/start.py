@@ -21,7 +21,7 @@ from helper_func import subscribed, encode, decode, get_messages, get_shortlink,
 from database.database import add_user, del_user, full_userbase, present_user
 from shortzy import Shortzy
 
-delete_after = 600
+#delete_after = 600
 
 client = MongoClient(DB_URI)  # Replace with your MongoDB URI
 db = client[DB_NAME]  # Database name
@@ -159,7 +159,7 @@ async def start_command(client: Client, message: Message):
                 try:
                     snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
                     snt_msgs.append(snt_msg)
-                    asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=60))
+                    asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=delete_after))
                     await message.reply_text("The message will be automatically deleted in 60 seconds.")
                     await asyncio.sleep(0.2)
                 except FloodWait as e:
