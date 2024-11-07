@@ -205,7 +205,7 @@ async def start_command(client: Client, message: Message):
                             ]
                         ]
                     )
-                    await message.reply("File was deleted after the {delete_after} second. \nUse the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
+                    await message.reply(f"File was deleted after the {delete_after} second. \nUse the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
             
                         
                     #asyncio.sleep(0.2)
