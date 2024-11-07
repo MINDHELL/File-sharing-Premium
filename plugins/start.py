@@ -96,12 +96,12 @@ async def add_delete_task(chat_id, message_id, delete_at):
 
 # Non-blocking auto-delete function with user notification
 async def schedule_auto_delete(client, chat_id, message_id, delay):
-    delete_at = datetime.now() + timedelta(seconds=delay)
+    delete_at = datetime.now() + timedelta(seconds=int(delay))
     await add_delete_task(chat_id, message_id, delete_at)
     
     # Run deletion in the background to prevent blocking
     async def delete_message():
-        await asyncio.sleep(delay)
+        await asyncio.sleep(int(delay))
         try:
             # Delete the message
             await client.delete_messages(chat_id=chat_id, message_ids=message_id)
