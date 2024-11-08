@@ -237,7 +237,7 @@ async def start_command(client: Client, message: Message):
                     snt_msgs.append(snt_msg)     
 
             # Notify user to get file again if messages are auto-deleted
-            if GET_AGAIN:
+            if GET_AGAIN == True:
                 get_file_markup = InlineKeyboardMarkup([
                     [InlineKeyboardButton("GET FILE AGAIN", url=f"https://t.me/{client.username}?start={message.text.split()[1]}")]
                 ])
