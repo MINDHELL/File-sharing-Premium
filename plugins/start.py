@@ -150,6 +150,15 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
     asyncio.create_task(delete_message())  # Schedule the deletion and notification in the background
 
 
+# Function to delete the notification message after a set delay
+async def delete_notification_after_delay(client, chat_id, message_id, delay):
+    await asyncio.sleep(delay)
+    try:
+        # Delete the notification message
+        await client.delete_messages(chat_id=chat_id, message_ids=message_id)
+    except Exception as e:
+        print(f"Error deleting notification {message_id} in chat {chat_id}: {e}")
+        
         
 @Bot.on_message(filters.command('start') & filters.private & subscribed )
 async def start_command(client: Client, message: Message):
@@ -244,8 +253,8 @@ async def start_command(client: Client, message: Message):
                 await message.reply(f"File was deleted after {delete_after} seconds. Use the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
 
             if AUTO_DELETE and GET_AGAIN == False:
-                await message.reply(f"File was deleted after {delete_after} seconds.")
-                         
+                delete_notification = await message.reply(f"File will delete after {delete_after} seconds.")
+                asyncio.create_task(delete_notification_after_delay(client, delete_notification.chat.id, delete_notification.id, delay=40))
               
         elif verify_status['is_verified'] or premium_status:
             reply_markup = InlineKeyboardMarkup(
