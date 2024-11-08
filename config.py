@@ -17,6 +17,7 @@ SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "ULTROIDOFFICIAL_CHAT") # WITHOU
 CHANNEL = os.environ.get("CHANNEL", "ULTROID_OFFICIAL") # WITHOUR @
 delete_after = os.environ.get("delete_after", 60) #seconds
 AUTO_DELETE = os.environ.get("AUTO_DELETE", "True")
+GET_AGAIN = os.environ.get("GET_AGAIN", "False")
 
 PAYMENT_QR = os.getenv('PAYMENT_QR', 'https://graph.org/file/c54fdc8a5580bb801abc2.jpg')
 
