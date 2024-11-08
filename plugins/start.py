@@ -93,7 +93,7 @@ async def add_delete_task(chat_id, message_id, delete_at):
         "message_id": message_id,
         "delete_at": delete_at
     })
-
+"""
 # Non-blocking auto-delete function with user notification
 async def schedule_auto_delete(client, chat_id, message_id, delay):
     delete_at = datetime.now() + timedelta(seconds=int(delay))
@@ -115,7 +115,42 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
             print(f"Error deleting message {message_id} in chat {chat_id}: {e}")
 
     asyncio.create_task(delete_message())  # Schedule the deletion and notification in the background
+"""
+# Function to delete the notification after a set delay
+async def delete_notification(client, chat_id, notification_id, delay):
+    await asyncio.sleep(delay)
+    try:
+        # Delete the notification message
+        await client.delete_messages(chat_id=chat_id, message_ids=notification_id)
+    except Exception as e:
+        print(f"Error deleting notification {notification_id} in chat {chat_id}: {e}")
+        
+async def schedule_auto_delete(client, chat_id, message_id, delay):
+    delete_at = datetime.now() + timedelta(seconds=int(delay))
+    await add_delete_task(chat_id, message_id, delete_at)
+    
+    # Run deletion in the background to prevent blocking
+    async def delete_message():
+        await asyncio.sleep(int(delay))
+        try:
+            # Delete the original message
+            await client.delete_messages(chat_id=chat_id, message_ids=message_id)
+            delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
+            
+            # Send a notification about the deletion
+            notification_text = "Successfully DELETED !!"
+            notification_msg = await client.send_message(chat_id, notification_text)
+            
+            # Schedule deletion of the notification after 60 seconds
+            asyncio.create_task(delete_notification(client, chat_id, notification_msg.id, 40))
+        
+        except Exception as e:
+            print(f"Error deleting message {message_id} in chat {chat_id}: {e}")
 
+    asyncio.create_task(delete_message())  # Schedule the deletion and notification in the background
+
+
+        
 @Bot.on_message(filters.command('start') & filters.private & subscribed )
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
@@ -202,14 +237,15 @@ async def start_command(client: Client, message: Message):
                     snt_msgs.append(snt_msg)     
 
             # Notify user to get file again if messages are auto-deleted
-            if AUTO_DELETE:
+            if GET_AGAIN:
                 get_file_markup = InlineKeyboardMarkup([
                     [InlineKeyboardButton("GET FILE AGAIN", url=f"https://t.me/{client.username}?start={message.text.split()[1]}")]
                 ])
                 await message.reply(f"File was deleted after {delete_after} seconds. Use the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
-                
 
-            
+            if AUTO_DELETE and GET_AGAIN == False:
+                await message.reply(f"File was deleted after {delete_after} seconds.")
+                         
               
         elif verify_status['is_verified'] or premium_status:
             reply_markup = InlineKeyboardMarkup(
