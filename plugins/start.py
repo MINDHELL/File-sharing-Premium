@@ -26,7 +26,7 @@ from shortzy import Shortzy
 client = MongoClient(DB_URI)  # Replace with your MongoDB URI
 db = client[DB_NAME]  # Database name
 phdlust = db["phdlust"]  # Collection for users
-delete_tasks = db["delete_tasks"] 
+phdlust_tasks = db["phdlust_tasks"] 
 
 
 
@@ -61,7 +61,7 @@ async def is_premium_user(user_id):
 
 # Function to add a delete task to the database
 async def add_delete_task(chat_id, message_id, delete_at):
-    delete_tasks.insert_one({
+    phdlust_tasks.insert_one({
         "chat_id": chat_id,
         "message_id": message_id,
         "delete_at": delete_at
@@ -86,7 +86,7 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
         try:
             # Delete the original message
             await client.delete_messages(chat_id=chat_id, message_ids=message_id)
-            delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
+            phdlust_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
             
             # Send a notification about the deletion
             notification_text = "Successfully DELETED !!"
