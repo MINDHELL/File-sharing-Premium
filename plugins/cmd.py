@@ -121,18 +121,7 @@ async def my_plan(bot: Bot, message: Message):
 # Command to show subscription plans
 @Bot.on_message(filters.command('plans') & filters.private)
 async def show_plans(bot: Bot, message: Message):
-    plans_text = """
-<b>Available Subscription Plans:</b>
-
-1. 7 Days Premium  - 20₹
-2. 15 Days Premium - 35₹
-3. 30 Days Premium - 50₹
-4. 90 Days Premium - 100₹
-
-🎁 <b>Premium Features Included</b>
-
-To subscribe, click the "Pay via UPI" button below.
-"""
+    plans_text = PAYMENT_TEXT 
     buttons = InlineKeyboardMarkup([
         [InlineKeyboardButton("Pay via UPI", callback_data="upi_info")],
         [InlineKeyboardButton("Contact Support", url=f"https://t.me/{OWNER}")]
@@ -156,8 +145,8 @@ async def upi_info(bot: Bot, message: Message):
 @Bot.on_message(filters.private & filters.command('getpremiumusers') & filters.user(ADMINS))
 async def get_premium_users(bot: Bot, message: Message):
     try:
-        premium_users = pusers.find({"is_premium": True, "expiry_time": {"$gt": time.time()}})
-        if not pusers.count_documents({"is_premium": True, "expiry_time": {"$gt": time.time()}}):
+        premium_users = phdlust.find({"is_premium": True, "expiry_time": {"$gt": time.time()}})
+        if not phdlust.count_documents({"is_premium": True, "expiry_time": {"$gt": time.time()}}):
             return await message.reply("No active premium users found.")
 
         users_list = [
