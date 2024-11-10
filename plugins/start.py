@@ -25,7 +25,7 @@ from shortzy import Shortzy
 
 client = MongoClient(DB_URI)  # Replace with your MongoDB URI
 db = client[DB_NAME]  # Database name
-pusers = db["pusers"]  # Collection for users
+phdlust = db["phdlust"]  # Collection for users
 delete_tasks = db["delete_tasks"] 
 
 
@@ -33,20 +33,20 @@ delete_tasks = db["delete_tasks"]
 # MongoDB Helper Functions
 async def add_premium_user(user_id, duration_in_days):
     expiry_time = time.time() + (duration_in_days * 86400)  # Calculate expiry time in seconds
-    pusers.update_one(
+    phdlust.update_one(
         {"user_id": user_id},
         {"$set": {"is_premium": True, "expiry_time": expiry_time}},
         upsert=True
     )
 
 async def remove_premium_user(user_id):
-    pusers.update_one(
+    phdlust.update_one(
         {"user_id": user_id},
         {"$set": {"is_premium": False, "expiry_time": None}}
     )
 
 async def get_user_subscription(user_id):
-    user = pusers.find_one({"user_id": user_id})
+    user = phdlust.find_one({"user_id": user_id})
     if user:
         return user.get("is_premium", False), user.get("expiry_time", None)
     return False, None
@@ -57,34 +57,7 @@ async def is_premium_user(user_id):
         return True
     return False
 
-"""
-# Function to schedule deletion of a message
-async def schedule_auto_delete(client, chat_id, message_id, delay):
-    await sleep(delay)  # Delay in seconds
-    await client.delete_messages(chat_id=chat_id, message_ids=message_id)
-    logger.info(f"Deleted message with ID {message_id} from chat {chat_id}")
-"""
-"""
-# Function to add a delete task to the database
-async def add_delete_task(chat_id, message_id, delete_at):
-    delete_tasks.insert_one({
-        "chat_id": chat_id,
-        "message_id": message_id,
-        "delete_at": delete_at
-    })
 
-# Non-blocking auto-delete function
-async def schedule_auto_delete(client, chat_id, message_id, delay):
-    delete_at = datetime.now() + timedelta(seconds=delay)
-    await add_delete_task(chat_id, message_id, delete_at)
-    
-    # Run deletion in the background to prevent blocking
-    async def delete_message():
-        await asyncio.sleep(delay)
-        await client.delete_messages(chat_id=chat_id, message_ids=message_id)
-        delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
-    asyncio.create_task(delete_message())  # Schedule in background
-"""
 
 # Function to add a delete task to the database
 async def add_delete_task(chat_id, message_id, delete_at):
@@ -93,29 +66,7 @@ async def add_delete_task(chat_id, message_id, delete_at):
         "message_id": message_id,
         "delete_at": delete_at
     })
-"""
-# Non-blocking auto-delete function with user notification
-async def schedule_auto_delete(client, chat_id, message_id, delay):
-    delete_at = datetime.now() + timedelta(seconds=int(delay))
-    await add_delete_task(chat_id, message_id, delete_at)
-    
-    # Run deletion in the background to prevent blocking
-    async def delete_message():
-        await asyncio.sleep(int(delay))
-        try:
-            # Delete the message
-            await client.delete_messages(chat_id=chat_id, message_ids=message_id)
-            delete_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
-            
-            # Notify the user that the message has been deleted
-            notification_text = f"Successfully DELETED !!"
-            await client.send_message(chat_id, notification_text)
-        
-        except Exception as e:
-            print(f"Error deleting message {message_id} in chat {chat_id}: {e}")
 
-    asyncio.create_task(delete_message())  # Schedule the deletion and notification in the background
-"""
 # Function to delete the notification after a set delay
 async def delete_notification(client, chat_id, notification_id, delay):
     await asyncio.sleep(delay)
@@ -147,10 +98,10 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
         except Exception as e:
             print(f"Error deleting message {message_id} in chat {chat_id}: {e}")
 
-    asyncio.create_task(delete_message())  # Schedule the deletion and notification in the background
+    asyncio.create_task(delete_message())  
 
 
-# Function to delete the notification message after a set delay
+
 async def delete_notification_after_delay(client, chat_id, message_id, delay):
     await asyncio.sleep(delay)
     try:
@@ -218,7 +169,7 @@ async def start_command(client: Client, message: Message):
                 return
             await temp_msg.delete()
 
-            snt_msgs = []
+            phdlusts = []
             messages = await get_messages(client, ids)
             for msg in messages:
                 if bool(CUSTOM_CAPTION) & bool(msg.document):
@@ -233,17 +184,17 @@ async def start_command(client: Client, message: Message):
                 
                 try:
                     messages = await get_messages(client, ids)
-                    snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
-                    snt_msgs.append(snt_msg)
+                    phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
+                    phdlusts.append(phdlust)
                     if AUTO_DELETE:
                         #await message.reply_text(f"The message will be automatically deleted in {delete_after} seconds.")
-                        asyncio.create_task(schedule_auto_delete(client, snt_msg.chat.id, snt_msg.id, delay=delete_after))
+                        asyncio.create_task(schedule_auto_delete(client, phdlust.chat.id, phdlust.id, delay=delete_after))
                     await asyncio.sleep(0.2)      
                     #asyncio.sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    snt_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
-                    snt_msgs.append(snt_msg)     
+                    phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
+                    phdlusts.append(phdlust)     
 
             # Notify user to get file again if messages are auto-deleted
             if GET_AGAIN == True:
