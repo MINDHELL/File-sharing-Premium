@@ -7,17 +7,17 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "706246877AG2E6pjv3nwFJY-flKCFi0jv8WEuTs")
-APP_ID = int(os.environ.get("APP_ID", "22505271"))
-API_HASH = os.environ.get("API_HASH", "c89a94fcfda4bc06524d0903977fc81e")
+APP_ID = int(os.environ.get("APP_ID", "9218751"))
+API_HASH = os.environ.get("API_HASH", "82f5398437eb5474b676e83ed67e69cc")
  
 BAN = int(os.environ.get("BAN", "1198543450")) #Owner user id
-OWNER = os.environ.get("OWNER", "PhDLust") #Owner username
-OWNER_ID = int(os.environ.get("OWNER_ID", "7131513396")) #Owner user id
-SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "ULTROIDOFFICIAL_CHAT") # WITHOUR @
-CHANNEL = os.environ.get("CHANNEL", "ULTROID_OFFICIAL") # WITHOUR @
+OWNER = os.environ.get("OWNER", "Xsupprtbot") #Owner username
+OWNER_ID = int(os.environ.get("OWNER_ID", "7125905015")) #Owner user id
+SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "XSUPPORTCHATS") # WITHOUR @
+CHANNEL = os.environ.get("CHANNEL", "XMAINOFFICIAL") # WITHOUR @
 delete_after = os.environ.get("delete_after", 60) #seconds
 AUTO_DELETE = os.environ.get("AUTO_DELETE", True)
-GET_AGAIN = os.environ.get("GET_AGAIN", False)
+GET_AGAIN = os.environ.get("GET_AGAIN", false)
 
 PAYMENT_QR = os.getenv('PAYMENT_QR', 'https://graph.org/file/c54fdc8a5580bb801abc2.jpg')
 
@@ -32,16 +32,16 @@ PAYMENT_TEXT = os.getenv('PAYMENT_TEXT', '<b>- ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀ�
                                       'ᴄʟɪᴄᴋ ᴛᴏ ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴ /myplan\n\n'
                                       '💢 ᴍᴜsᴛ sᴇɴᴅ sᴄʀᴇᴇɴsʜᴏᴛ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ\n\n'
                                       '‼️ ᴀғᴛᴇʀ sᴇɴᴅɪɴɢ ᴀ sᴄʀᴇᴇɴsʜᴏᴛ ᴘʟᴇᴀsᴇ ɢɪᴠᴇ ᴜs sᴏᴍᴇ ᴛɪᴍᴇ ᴛᴏ ᴀᴅᴅ ʏᴏᴜ ɪɴ ᴛʜᴇ ᴘʀᴇᴍɪᴜᴍ</b>')
-OWNER_USERNAME = os.getenv('OWNER_USERNAME', 'jatin_24x')
+OWNER_USERNAME = os.getenv('OWNER_USERNAME', 'XSUPPRTBOT)
 
-DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DB_NAME = os.environ.get("DATABASE_NAME", "Cluser10")
+DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://aarshhub:6L1PAPikOnAIHIRA@cluster0.6shiu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DB_NAME = os.environ.get("DATABASE_NAME", "TeraDatabase")
 
-CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002075726565")) #database save channel id 
-FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "-1002182435006"))
-FORCE_SUB_CHANNEL2 = int(os.environ.get("FORCE_SUB_CHANNEL2", "-1002182435006"))
-FORCE_SUB_CHANNEL3 = int(os.environ.get("FORCE_SUB_CHANNEL3", "-1002182435006"))
-FORCE_SUB_CHANNEL4 = int(os.environ.get("FORCE_SUB_CHANNEL4", "-1002182435006"))
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002187065564")) #database save channel id 
+FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "0"))
+FORCE_SUB_CHANNEL2 = int(os.environ.get("FORCE_SUB_CHANNEL2", "0"))
+FORCE_SUB_CHANNEL3 = int(os.environ.get("FORCE_SUB_CHANNEL3", "0"))
+FORCE_SUB_CHANNEL4 = int(os.environ.get("FORCE_SUB_CHANNEL4", "0"))
 
 #Shortner (token system) 
 
@@ -58,8 +58,8 @@ TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "4"))
 START_MSG = os.environ.get("START_MESSAGE", "Hello {first}\n\nI can store private files in Specified Channel and other users can access it from special link.")
 
 try:
-    ADMINS=[6020516635]
-    for x in (os.environ.get("ADMINS", "1198543451 6940013358 6020516635 1837294444 6695586027").split()):
+    ADMINS=[7125905015]
+    for x in (os.environ.get("ADMINS", "1198543451 6020516635 1837294444 6695586027").split()):
         ADMINS.append(int(x))
 except ValueError:
         raise Exception("Your Admins list does not contain valid integers.")
@@ -77,7 +77,7 @@ BOT_STATS_TEXT = "<b>BOT UPTIME</b>\n{uptime}"
 USER_REPLY_TEXT = "❌Don't send me messages directly I'm only File Share bot !"
 
 ADMINS.append(OWNER_ID)
-ADMINS.append(6695586027)
+ADMINS.append(7125905015)
 
 LOG_FILE_NAME = "uxblogs.txt"
 
