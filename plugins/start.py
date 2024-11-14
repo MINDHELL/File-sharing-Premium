@@ -204,7 +204,8 @@ async def start_command(client: Client, message: Message):
                 await message.reply(f"File was deleted after {delete_after} seconds. Use the button below to GET FILE AGAIN.", reply_markup=get_file_markup)
 
             if AUTO_DELETE and GET_AGAIN == False:
-                delete_notification = await message.reply(f"File will delete after {delete_after} seconds.")
+                delete_notification = await message.reply(f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis File/Video will be deleted in <b><u>12 HOUR</u> 🫥 <i></b>(Due to Security purpose)</i>.\n\n<b><i>THANKS</b>")
+            await asyncio.sleep(AUTO_DELETE_TIME).")
                 asyncio.create_task(delete_notification_after_delay(client, delete_notification.chat.id, delete_notification.id, delay=40))
               
         elif verify_status['is_verified'] or premium_status:
