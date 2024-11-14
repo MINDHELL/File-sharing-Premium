@@ -19,7 +19,7 @@ delete_after = os.environ.get("delete_after", 43200) #seconds
 AUTO_DELETE = os.environ.get("AUTO_DELETE", True)
 GET_AGAIN = os.environ.get("GET_AGAIN", False)
 
-PAYMENT_QR = os.getenv('PAYMENT_QR', 'https://graph.org/file/c54fdc8a5580bb801abc2.jpg')
+PAYMENT_QR = os.getenv('PAYMENT_QR', 'https://envs.sh/LRT.jpg')
 
 PAYMENT_TEXT = os.getenv('PAYMENT_TEXT', '<b>- ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs - \n\n'
                                       '- 20ʀs - 1 ᴡᴇᴇᴋ\n- 50ʀs - 1 ᴍᴏɴᴛʜ\n'
@@ -45,7 +45,7 @@ FORCE_SUB_CHANNEL4 = int(os.environ.get("FORCE_SUB_CHANNEL4", "0"))
 
 #Shortner (token system) 
 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "inshorturl.com") 
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "runurl.in") 
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "9f943360c339cec4fed66d9d5cbaa0c2b3d41f81")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True")
