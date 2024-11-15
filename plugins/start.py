@@ -184,7 +184,7 @@ async def start_command(client: Client, message: Message):
                 
                 try:
                     messages = await get_messages(client, ids)
-                    phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
+                    phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup , protect_content=PROTECT_CONTENT)
                     phdlusts.append(phdlust)
                     if AUTO_DELETE:
                         #await message.reply_text(f"The message will be automatically deleted in {delete_after} seconds.")
@@ -193,7 +193,7 @@ async def start_command(client: Client, message: Message):
                     #asyncio.sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup)
+                    phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup , protect_content=PROTECT_CONTENT)
                     phdlusts.append(phdlust)     
 
             # Notify user to get file again if messages are auto-deleted
