@@ -47,7 +47,7 @@ FORCE_SUB_CHANNEL4 = int(os.environ.get("FORCE_SUB_CHANNEL4", "0"))
 
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "instantearn.in") 
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "e753b45153becd850d3142dbdfce442891a7b1d0")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 60)) # Add time in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True")
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/Xmainofficial/91")
 
