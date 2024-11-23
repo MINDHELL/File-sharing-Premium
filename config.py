@@ -15,9 +15,9 @@ OWNER = os.environ.get("OWNER", "Xsupprtbot") #Owner username
 OWNER_ID = int(os.environ.get("OWNER_ID", "7125905015")) #Owner user id
 SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "XSUPPORTCHATS") # WITHOUR @
 CHANNEL = os.environ.get("CHANNEL", "XMAINOFFICIAL") # WITHOUR @
-delete_after = os.environ.get("delete_after", 43200) #seconds
+delete_after = os.environ.get("delete_after", 12) #seconds
 AUTO_DELETE = os.environ.get("AUTO_DELETE", True)
-GET_AGAIN = os.environ.get("GET_AGAIN", False)
+GET_AGAIN = os.environ.get("GET_AGAIN", True)
 
 PAYMENT_QR = os.getenv('PAYMENT_QR', 'https://envs.sh/LRT.jpg')
 
